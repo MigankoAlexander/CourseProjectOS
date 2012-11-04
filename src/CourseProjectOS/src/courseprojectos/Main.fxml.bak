@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.net.*?>
+<?import java.util.*?>
+<?import javafx.collections.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane id="AnchorPane" prefHeight="407.0" prefWidth="697.0" styleClass="background" xmlns:fx="http://javafx.com/fxml" fx:controller="courseprojectos.MainController">
+  <children>
+    <AnchorPane fx:id="anchorPaneTutorial" prefHeight="400.0" prefWidth="600.0" styleClass="background" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <children>
+        <Button id="btnTutorialToMain" layoutX="15.0" layoutY="40.0" mnemonicParsing="false" onAction="#handleButtonToMain" prefWidth="162.0" text="На главную" />
+      </children>
+      <stylesheets>
+        <URL value="@main.css" />
+      </stylesheets>
+    </AnchorPane>
+    <AnchorPane fx:id="anchorPaneHelp" prefHeight="400.0" prefWidth="600.0" styleClass="background" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <children>
+        <Button id="btnHelpToMain" layoutX="15.0" layoutY="40.0" mnemonicParsing="false" onAction="#handleButtonToMain" prefWidth="162.0" text="На главную" />
+      </children>
+      <stylesheets>
+        <URL value="@main.css" />
+      </stylesheets>
+    </AnchorPane>
+    <AnchorPane fx:id="anchorPaneChart" prefHeight="374.0000999999975" prefWidth="639.0" styleClass="background" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <children>
+        <Pane id="dataPane" fx:id="paneData" prefHeight="262.0000999999975" prefWidth="200.0" styleClass="top-segment" AnchorPane.bottomAnchor="77.0" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="35.0">
+          <children>
+            <Label alignment="TOP_LEFT" labelFor="$paneData" layoutX="39.0" layoutY="101.0" maxWidth="180.0" prefHeight="18.0986328125" prefWidth="123.0" text="Загрузите данные" />
+            <Label labelFor="$paneData" layoutX="83.0" layoutY="126.0" text="или" />
+            <Label labelFor="$paneData" layoutX="20.0" layoutY="151.0" text="создайте &quot;Новый набор&quot;" />
+          </children>
+        </Pane>
+        <Button mnemonicParsing="false" prefHeight="46.0" prefWidth="200.0" text="Построить график" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" />
+        <ScrollPane fx:id="paneChartContainer" prefHeight="357.0000999999975" prefWidth="458.0" styleClass="top-segment" AnchorPane.bottomAnchor="13.0" AnchorPane.leftAnchor="225.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="36.0">
+          <content>
+            <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="200.0" prefWidth="200.0">
+              <children>
+                <LineChart fx:id="lineChart" prefHeight="348.0" prefWidth="448.0">
+                  <xAxis>
+                    <CategoryAxis side="BOTTOM">
+                      <categories>
+                        <FXCollections fx:factory="observableArrayList" />
+                      </categories>
+                    </CategoryAxis>
+                  </xAxis>
+                  <yAxis>
+                    <NumberAxis side="LEFT" />
+                  </yAxis>
+                </LineChart>
+              </children>
+            </AnchorPane>
+          </content>
+        </ScrollPane>
+      </children>
+      <stylesheets>
+        <URL value="@main.css" />
+      </stylesheets>
+    </AnchorPane>
+    <MenuBar prefWidth="697.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <menus>
+        <Menu mnemonicParsing="false" text="Файл">
+          <items>
+            <MenuItem mnemonicParsing="false" text="Открыть..." />
+            <SeparatorMenuItem mnemonicParsing="false" />
+            <MenuItem mnemonicParsing="false" text="Сохранить" />
+            <MenuItem mnemonicParsing="false" text="Сохранить как..." />
+            <SeparatorMenuItem mnemonicParsing="false" />
+            <MenuItem mnemonicParsing="false" text="Выйти" />
+          </items>
+        </Menu>
+        <Menu mnemonicParsing="false" text="Помощь">
+          <items>
+            <MenuItem mnemonicParsing="false" onAction="#handleMenuItemTutorial" text="Туториал" fx:id="menuItemTutorial" />
+            <MenuItem mnemonicParsing="false" onAction="#handleMenuItemHelp" text="Справка" fx:id="menuItemHelp" />
+          </items>
+        </Menu>
+        <Menu mnemonicParsing="false" text="О проекте" />
+      </menus>
+    </MenuBar>
+  </children>
+  <stylesheets>
+    <URL value="@main.css" />
+  </stylesheets>
+</AnchorPane>
