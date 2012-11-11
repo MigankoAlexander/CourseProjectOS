@@ -27,15 +27,12 @@
         <URL value="@main.css" />
       </stylesheets>
     </AnchorPane>
-    <AnchorPane fx:id="anchorPaneChart" prefHeight="374.0000999999975" prefWidth="639.0" styleClass="background" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-      <children>
-        <Pane id="dataPane" fx:id="paneData" prefHeight="262.0000999999975" prefWidth="200.0" styleClass="top-segment" AnchorPane.bottomAnchor="77.0" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="35.0">
-          <children>
-            <Label alignment="TOP_LEFT" labelFor="$paneData" layoutX="39.0" layoutY="101.0" maxWidth="180.0" prefHeight="18.0986328125" prefWidth="123.0" text="Загрузите данные" />
-            <Label labelFor="$paneData" layoutX="83.0" layoutY="126.0" text="или" />
-            <Label labelFor="$paneData" layoutX="20.0" layoutY="151.0" text="создайте &quot;Новый набор&quot;" />
-          </children>
-        </Pane>
+    <AnchorPane fx:id="anchorDataPane" prefHeight="374.0000999999975" prefWidth="639.0" styleClass="background" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <children>
+            <TableView fx:id="list" prefHeight="262.0000999999975" prefWidth="200.0" styleClass="top-segment" AnchorPane.bottomAnchor="77.0" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="35.0">
+            </TableView>
+        </children>
+        <children>
         <Button mnemonicParsing="false" prefHeight="46.0" prefWidth="200.0" text="Построить график" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" />
         <ScrollPane fx:id="paneChartContainer" prefHeight="357.0000999999975" prefWidth="458.0" styleClass="top-segment" AnchorPane.bottomAnchor="13.0" AnchorPane.leftAnchor="225.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="36.0">
           <content>
@@ -43,14 +40,10 @@
               <children>
                 <LineChart fx:id="lineChart" prefHeight="348.0" prefWidth="448.0">
                   <xAxis>
-                    <CategoryAxis side="BOTTOM">
-                      <categories>
-                        <FXCollections fx:factory="observableArrayList" />
-                      </categories>
-                    </CategoryAxis>
+                    <NumberAxis fx:id="xAxis" side="BOTTOM"/>
                   </xAxis>
                   <yAxis>
-                    <NumberAxis side="LEFT" />
+                    <NumberAxis fx:id="yAxis" side="LEFT" />
                   </yAxis>
                 </LineChart>
               </children>
@@ -62,12 +55,29 @@
         <URL value="@main.css" />
       </stylesheets>
     </AnchorPane>
+    <AnchorPane fx:id="anchorPaneChart" prefHeight="374.0000999999975" prefWidth="639.0" styleClass="background" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <children>
+          <Pane id="dataPane" fx:id="paneData" prefHeight="262.0000999999975" prefWidth="200.0" styleClass="top-segment" AnchorPane.bottomAnchor="77.0" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="35.0">
+          <children>
+            <Label alignment="TOP_LEFT" labelFor="$paneData" layoutX="39.0" layoutY="101.0" maxWidth="180.0" prefHeight="18.0986328125" prefWidth="123.0" text="Загрузите данные" />
+            <Label labelFor="$paneData" layoutX="83.0" layoutY="126.0" text="или" />
+            <Label labelFor="$paneData" layoutX="20.0" layoutY="151.0" text="создайте &quot;Новый набор&quot;" />
+          </children>
+        </Pane>
+        <ScrollPane fx:id="paneChartContainer" prefHeight="357.0000999999975" prefWidth="458.0" styleClass="top-segment" AnchorPane.bottomAnchor="13.0" AnchorPane.leftAnchor="225.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="36.0">
+        </ScrollPane>
+        <Button mnemonicParsing="false" prefHeight="46.0" prefWidth="200.0" text="Построить график" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" />
+      </children>
+      <stylesheets>
+        <URL value="@main.css" />
+      </stylesheets>
+    </AnchorPane>
     <MenuBar prefWidth="697.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
       <menus>
         <Menu mnemonicParsing="false" text="Файл">
           <items>
-            <MenuItem mnemonicParsing="false" text="Новый набор" />
-            <MenuItem mnemonicParsing="false" text="Открыть..." />
+            <MenuItem mnemonicParsing="false" text="Новый набор" onAction="#handleMenuItemNew"/>
+            <MenuItem mnemonicParsing="false" text="Открыть..." onAction="#handleMenuItemOpen"/>
             <SeparatorMenuItem mnemonicParsing="false" />
             <MenuItem mnemonicParsing="false" text="Сохранить" />
             <MenuItem mnemonicParsing="false" text="Сохранить как..." />
