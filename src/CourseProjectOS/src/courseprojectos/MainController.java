@@ -11,6 +11,8 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -31,8 +33,13 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.effect.Glow;
+import javafx.scene.effect.Reflection;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.util.Callback;
 import javax.swing.JFileChooser;
@@ -52,6 +59,10 @@ public class MainController implements Initializable {
     @FXML
     private AnchorPane anchorDataPane;
     @FXML
+    private AnchorPane dockPane;
+    @FXML
+    private AnchorPane dockPane1;
+    @FXML
     private ScrollPane paneChartContainer;
     @FXML
     private LineChart lineChart;
@@ -67,17 +78,17 @@ public class MainController implements Initializable {
     private ObservableList<XYChart.Data> dataList = null;
 
     @FXML
-    private void handleMenuItemTutorial(ActionEvent event) {
+    private void handleMenuItemTutorial() {
         setCurrentPane(anchorPaneTutorial);
     }
 
     @FXML
-    private void handleMenuItemHelp(ActionEvent event) {
+    private void handleMenuItemHelp() {
         setCurrentPane(anchorPaneHelp);
     }
 
     @FXML
-    private void handleMenuItemExit(ActionEvent event) {
+    private void handleMenuItemExit() {
         System.exit(0);
     }
 
@@ -87,7 +98,7 @@ public class MainController implements Initializable {
     }
 
     @FXML
-    private void handleMenuItemOpen(ActionEvent event) throws FileNotFoundException, IOException {
+    private void handleMenuItemOpen() throws FileNotFoundException, IOException {
         JFileChooser fc = new JFileChooser();
         if (fc.showOpenDialog(fc) == JFileChooser.APPROVE_OPTION) {
             file = fc.getSelectedFile();
@@ -96,9 +107,91 @@ public class MainController implements Initializable {
     }
 
     @FXML
+    private void handleMenuItemDock(AnchorPane anchorPane) {
+        Image image = new Image(getClass().getResource("dock.png").toString());
+        double hight = image.getWidth();
+        ImageView dock = new ImageView(image);
+        anchorPane.getChildren().add(dock);
+
+        String images[] = {
+            "icon(1).png",
+            "icon(2).png",
+            "icon(3).png",
+            "icon(4).png",
+            "icon(5).png",
+            "icon(6).png",
+            "icon(7).png",
+            "icon(8).png",
+            "icon(9).png",
+            "icon(10).png"
+        };
+
+        for (int i = 0; i < 3; i++) {
+            final ImageView node = new ImageView(new Image(getClass().getResource(images[i]).toString()));
+            node.setEffect(new Reflection(0, 0.45, 0.3, 0.1));
+            mouseEv(node);
+            final String action = images[i].split("-")[0].toLowerCase();
+            node.setOnMouseClicked(new EventHandler<MouseEvent>() {
+                @Override
+                public void handle(MouseEvent t) {
+                    mouseClicked(action);
+                }
+            });
+            node.setTranslateX(110 * (i + 1) - 80);
+            node.setTranslateY(35);
+            anchorPane.getChildren().add(node);
+        }
+        for (int i = 3; i < 6; i++) {
+            ImageView node = new ImageView(new Image(getClass().getResource(images[i]).toString()));
+            node.setEffect(new Reflection(0, 0.4, 0.3, 0.1));
+            mouseEv(node);
+            final String action = images[i].split("-")[0].toLowerCase();
+            node.setOnMouseClicked(new EventHandler<MouseEvent>() {
+                @Override
+                public void handle(MouseEvent t) {
+                    mouseClicked(action);
+                }
+            });
+            node.setTranslateX(110 * (i - 2) - 80);
+            node.setTranslateY(127);
+            anchorPane.getChildren().add(node);
+        }
+        for (int i = 6; i < 9; i++) {
+            ImageView node = new ImageView(new Image(getClass().getResource(images[i]).toString()));
+            node.setEffect(new Reflection(0, 0.45, 0.3, 0.1));
+            mouseEv(node);
+            final String action = images[i].split("-")[0].toLowerCase();
+            node.setOnMouseClicked(new EventHandler<MouseEvent>() {
+                @Override
+                public void handle(MouseEvent t) {
+                    mouseClicked(action);
+                }
+            });
+            node.setTranslateX(110 * (i - 5) - 80);
+            node.setTranslateY(215);
+            anchorPane.getChildren().add(node);
+        }
+        ImageView node = new ImageView(new Image(getClass().getResource(images[9]).toString()));
+        node.setEffect(new Reflection(0, 0.45, 0.3, 0.1));
+        mouseEv(node);
+        final String action = images[9].split("-")[0].toLowerCase();
+        node.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent t) {
+                mouseClicked(action);
+            }
+        });
+        node.setTranslateX(250);
+        node.setTranslateY(305);
+        anchorPane.getChildren().add(node);
+
+
+    }
+
+    @FXML
     private void handleMenuItemNew() {
-                
-        setCurrentPane(anchorDataPane);
+
+
 
         list.setEditable(true);
         Callback<TableColumn, TableCell> cellFactory =
@@ -178,8 +271,9 @@ public class MainController implements Initializable {
 
         list.setItems(dataList);
         list.getColumns().addAll(columnPressure, columnСoncentration);
-        
-      
+
+        setCurrentPane(anchorDataPane);
+        handleMenuItemDock(dockPane);
     }
 
     @Override
@@ -204,6 +298,8 @@ public class MainController implements Initializable {
 
         setAllInvisible();
         setCurrentPane(anchorPaneChart);
+
+        handleMenuItemDock(dockPane1);
     }
 
     private void setAllInvisible() {
@@ -219,6 +315,47 @@ public class MainController implements Initializable {
 
         currentPane = newCurrentPane;
         currentPane.setVisible(true);
+    }
+
+    private void mouseEv(final ImageView imageView) {
+        imageView.setOnMouseEntered(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent t) {
+                imageView.setEffect(new Glow(0.5));
+            }
+        });
+        imageView.setOnMouseExited(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent t) {
+                imageView.setEffect(new Reflection(0, 0.45, 0.3, 0.1));
+            }
+        });
+    }
+
+    public void mouseClicked(String action) {
+        switch (action) {
+            case "icon(1).png":
+                handleMenuItemNew();
+                break;
+            case "icon(2).png":
+                try {
+                    handleMenuItemOpen();
+                } catch (FileNotFoundException ex) {
+                    Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (IOException ex) {
+                    Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                break;
+            case "icon(5).png":
+                handleMenuItemTutorial();
+                break;
+            case "icon(8).png":
+                handleMenuItemHelp();
+                break;
+            case "icon(10).png":
+                handleMenuItemExit();
+                break;
+        }
     }
 }
 
