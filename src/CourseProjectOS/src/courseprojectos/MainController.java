@@ -108,27 +108,23 @@ public class MainController implements Initializable {
 
     @FXML
     private void handleMenuItemDock(AnchorPane anchorPane) {
-        Image image = new Image(getClass().getResource("dock.png").toString());
-        double hight = image.getWidth();
-        ImageView dock = new ImageView(image);
-        anchorPane.getChildren().add(dock);
 
         String images[] = {
-            "icon(1).png",
-            "icon(2).png",
-            "icon(3).png",
-            "icon(4).png",
-            "icon(5).png",
-            "icon(6).png",
-            "icon(7).png",
-            "icon(8).png",
-            "icon(9).png",
-            "icon(10).png"
+            "icon1.png",
+            "icon2.png",
+            "icon3.png",
+            "icon4.png",
+            "icon5.png",
+            "icon6.png",
+            "icon7.png",
+            "icon8.png",
+            "icon9.png",
+            "icon10.png"
         };
 
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 10; i++) {
             final ImageView node = new ImageView(new Image(getClass().getResource(images[i]).toString()));
-            node.setEffect(new Reflection(0, 0.45, 0.3, 0.1));
+            //node.setEffect(new Reflection(0, 0.5, 0.3, 0.1));
             mouseEv(node);
             final String action = images[i].split("-")[0].toLowerCase();
             node.setOnMouseClicked(new EventHandler<MouseEvent>() {
@@ -137,53 +133,53 @@ public class MainController implements Initializable {
                     mouseClicked(action);
                 }
             });
-            node.setTranslateX(110 * (i + 1) - 80);
-            node.setTranslateY(35);
+            node.setTranslateX(5+50*i);
+            node.setTranslateY(15);
             anchorPane.getChildren().add(node);
         }
-        for (int i = 3; i < 6; i++) {
-            ImageView node = new ImageView(new Image(getClass().getResource(images[i]).toString()));
-            node.setEffect(new Reflection(0, 0.4, 0.3, 0.1));
-            mouseEv(node);
-            final String action = images[i].split("-")[0].toLowerCase();
-            node.setOnMouseClicked(new EventHandler<MouseEvent>() {
-                @Override
-                public void handle(MouseEvent t) {
-                    mouseClicked(action);
-                }
-            });
-            node.setTranslateX(110 * (i - 2) - 80);
-            node.setTranslateY(127);
-            anchorPane.getChildren().add(node);
-        }
-        for (int i = 6; i < 9; i++) {
-            ImageView node = new ImageView(new Image(getClass().getResource(images[i]).toString()));
-            node.setEffect(new Reflection(0, 0.45, 0.3, 0.1));
-            mouseEv(node);
-            final String action = images[i].split("-")[0].toLowerCase();
-            node.setOnMouseClicked(new EventHandler<MouseEvent>() {
-                @Override
-                public void handle(MouseEvent t) {
-                    mouseClicked(action);
-                }
-            });
-            node.setTranslateX(110 * (i - 5) - 80);
-            node.setTranslateY(215);
-            anchorPane.getChildren().add(node);
-        }
-        ImageView node = new ImageView(new Image(getClass().getResource(images[9]).toString()));
-        node.setEffect(new Reflection(0, 0.45, 0.3, 0.1));
-        mouseEv(node);
-        final String action = images[9].split("-")[0].toLowerCase();
-        node.setOnMouseClicked(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent t) {
-                mouseClicked(action);
-            }
-        });
-        node.setTranslateX(250);
-        node.setTranslateY(305);
-        anchorPane.getChildren().add(node);
+//        for (int i = 3; i < 6; i++) {
+//            ImageView node = new ImageView(new Image(getClass().getResource(images[i]).toString()));
+//            node.setEffect(new Reflection(0, 0.4, 0.3, 0.1));
+//            mouseEv(node);
+//            final String action = images[i].split("-")[0].toLowerCase();
+//            node.setOnMouseClicked(new EventHandler<MouseEvent>() {
+//                @Override
+//                public void handle(MouseEvent t) {
+//                    mouseClicked(action);
+//                }
+//            });
+//            node.setTranslateX(110 * (i - 2) - 80);
+//            node.setTranslateY(127);
+//            anchorPane.getChildren().add(node);
+//        }
+//        for (int i = 6; i < 9; i++) {
+//            ImageView node = new ImageView(new Image(getClass().getResource(images[i]).toString()));
+//            node.setEffect(new Reflection(0, 0.45, 0.3, 0.1));
+//            mouseEv(node);
+//            final String action = images[i].split("-")[0].toLowerCase();
+//            node.setOnMouseClicked(new EventHandler<MouseEvent>() {
+//                @Override
+//                public void handle(MouseEvent t) {
+//                    mouseClicked(action);
+//                }
+//            });
+//            node.setTranslateX(110 * (i - 5) - 80);
+//            node.setTranslateY(215);
+//            anchorPane.getChildren().add(node);
+//        }
+//        ImageView node = new ImageView(new Image(getClass().getResource(images[9]).toString()));
+//        node.setEffect(new Reflection(0, 0.45, 0.3, 0.1));
+//        mouseEv(node);
+//        final String action = images[9].split("-")[0].toLowerCase();
+//        node.setOnMouseClicked(new EventHandler<MouseEvent>() {
+//            @Override
+//            public void handle(MouseEvent t) {
+//                mouseClicked(action);
+//            }
+//        });
+//        node.setTranslateX(250);
+//        node.setTranslateY(305);
+//        anchorPane.getChildren().add(node);
 
 
     }
@@ -217,7 +213,7 @@ public class MainController implements Initializable {
         columnСoncentration.setCellFactory(cellFactory);
         columnPressure.setCellFactory(cellFactory);
 
-        columnСoncentration.setOnEditCommit(
+        columnPressure.setOnEditCommit(
                 new EventHandler<TableColumn.CellEditEvent<XYChart.Data, Number>>() {
                     @Override
                     public void handle(TableColumn.CellEditEvent<XYChart.Data, Number> t) {
@@ -225,7 +221,7 @@ public class MainController implements Initializable {
                                 t.getTablePosition().getRow())).setYValue(t.getNewValue());
                     }
                 });
-        columnPressure.setOnEditCommit(
+        columnСoncentration.setOnEditCommit(
                 new EventHandler<TableColumn.CellEditEvent<XYChart.Data, Number>>() {
                     @Override
                     public void handle(TableColumn.CellEditEvent<XYChart.Data, Number> d) {
@@ -235,34 +231,34 @@ public class MainController implements Initializable {
                 });
 
         dataList = FXCollections.observableArrayList(
-                new XYChart.Data(3.347900E-05, 0.269),
-                new XYChart.Data(9.695830E-05, 6.520),
-                new XYChart.Data(7.174140E-04, 12.379),
-                new XYChart.Data(9.000000E-04, 20.176),
-                new XYChart.Data(8.525310E-04, 30.427),
-                new XYChart.Data(8.258400E-04, 41.669),
-                new XYChart.Data(8.756500E-04, 56.125),
-                new XYChart.Data(0.009, 72.375),
-                new XYChart.Data(0.035, 90.629),
-                new XYChart.Data(0.073, 109.879),
-                new XYChart.Data(0.138, 132.234),
-                new XYChart.Data(0.236, 153.388),
-                new XYChart.Data(0.361, 175.629),
-                new XYChart.Data(0.530, 201.329),
-                new XYChart.Data(0.853, 220.127),
-                new XYChart.Data(1.269, 253.177),
-                new XYChart.Data(1.447, 280.125),
-                new XYChart.Data(1.565, 319.246),
-                new XYChart.Data(1.579, 349.029),
-                new XYChart.Data(1.559, 389.149),
-                new XYChart.Data(1.535, 426.621),
-                new XYChart.Data(1.399, 477.666),
-                new XYChart.Data(1.287, 526.269),
-                new XYChart.Data(1.106, 559.875),
-                new XYChart.Data(0.863, 586.125));
+               new XYChart.Data(0.269, 3.347900E-05),
+                new XYChart.Data(6.520, 9.695830E-05),
+                new XYChart.Data(12.379, 7.174140E-04),
+                new XYChart.Data(20.176, 9.000000E-04),
+                new XYChart.Data(30.427, 8.525310E-04),
+                new XYChart.Data(41.669, 8.258400E-04),
+                new XYChart.Data(56.125, 8.756500E-04),
+                new XYChart.Data(72.375, 0.009),
+                new XYChart.Data(90.629, 0.035),
+                new XYChart.Data(109.879, 0.073),
+                new XYChart.Data(132.234, 0.138),
+                new XYChart.Data(153.388, 0.236),
+                new XYChart.Data(175.629, 0.361),
+                new XYChart.Data(201.329, 0.530),
+                new XYChart.Data(220.127, 0.853),
+                new XYChart.Data(253.177, 1.269),
+                new XYChart.Data(280.125, 1.447),
+                new XYChart.Data(319.246, 1.565),
+                new XYChart.Data(349.029, 1.579),
+                new XYChart.Data(389.149, 1.559),
+                new XYChart.Data(426.621, 1.535),
+                new XYChart.Data(477.666, 1.399),
+                new XYChart.Data(526.269, 1.287),
+                new XYChart.Data(559.875, 1.106),
+                new XYChart.Data(586.125, 0.863));
 
-        xAxis.setLabel("Pressure");
-        yAxis.setLabel("Concentration");
+        xAxis.setLabel("Concentration");
+        yAxis.setLabel("Pressure");
 
         lineChart.setTitle("Monitoring of technological process");
         XYChart.Series series = new XYChart.Series(dataList);
@@ -321,23 +317,23 @@ public class MainController implements Initializable {
         imageView.setOnMouseEntered(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent t) {
-                imageView.setEffect(new Glow(0.5));
+                imageView.setEffect(new Glow(0.7));
             }
         });
         imageView.setOnMouseExited(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent t) {
-                imageView.setEffect(new Reflection(0, 0.45, 0.3, 0.1));
+                imageView.setEffect(null);
             }
         });
     }
 
     public void mouseClicked(String action) {
         switch (action) {
-            case "icon(1).png":
+            case "icon1.png":
                 handleMenuItemNew();
                 break;
-            case "icon(2).png":
+            case "icon2.png":
                 try {
                     handleMenuItemOpen();
                 } catch (FileNotFoundException ex) {
@@ -346,15 +342,15 @@ public class MainController implements Initializable {
                     Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 break;
-            case "icon(5).png":
+            case "icon5.png":
                 handleMenuItemTutorial();
                 break;
-            case "icon(8).png":
+            case "icon8.png":
                 handleMenuItemHelp();
                 break;
-            case "icon(10).png":
+            case "icon10.png":
                 handleMenuItemExit();
-                break;
+//                break;
         }
     }
 }
