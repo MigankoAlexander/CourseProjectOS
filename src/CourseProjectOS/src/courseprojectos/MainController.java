@@ -71,6 +71,7 @@ public class MainController implements Initializable {
     @FXML
     private NumberAxis yAxis;
     private AnchorPane currentPane;
+    private AnchorPane previousPane;
     @FXML
     private TableView<XYChart.Data> list;
     private File file;
@@ -79,12 +80,25 @@ public class MainController implements Initializable {
 
     @FXML
     private void handleMenuItemTutorial() {
+        previousPane = currentPane;
         setCurrentPane(anchorPaneTutorial);
     }
 
     @FXML
     private void handleMenuItemHelp() {
+        previousPane = currentPane;
         setCurrentPane(anchorPaneHelp);
+    }
+
+    @FXML
+    private void handleBuild() {
+        xAxis.setLabel("Concentration");
+        yAxis.setLabel("Pressure");
+
+        lineChart.setTitle("Monitoring of technological process");
+        XYChart.Series series = new XYChart.Series(dataList);
+        series.setName("Schedule");
+        lineChart.getData().setAll(series);
     }
 
     @FXML
@@ -94,7 +108,7 @@ public class MainController implements Initializable {
 
     @FXML
     private void handleButtonToMain(ActionEvent event) {
-        setCurrentPane(anchorPaneChart);
+        setCurrentPane(previousPane);
     }
 
     @FXML
@@ -133,61 +147,15 @@ public class MainController implements Initializable {
                     mouseClicked(action);
                 }
             });
-            node.setTranslateX(5+50*i);
+            node.setTranslateX(5 + 50 * i);
             node.setTranslateY(15);
             anchorPane.getChildren().add(node);
         }
-//        for (int i = 3; i < 6; i++) {
-//            ImageView node = new ImageView(new Image(getClass().getResource(images[i]).toString()));
-//            node.setEffect(new Reflection(0, 0.4, 0.3, 0.1));
-//            mouseEv(node);
-//            final String action = images[i].split("-")[0].toLowerCase();
-//            node.setOnMouseClicked(new EventHandler<MouseEvent>() {
-//                @Override
-//                public void handle(MouseEvent t) {
-//                    mouseClicked(action);
-//                }
-//            });
-//            node.setTranslateX(110 * (i - 2) - 80);
-//            node.setTranslateY(127);
-//            anchorPane.getChildren().add(node);
-//        }
-//        for (int i = 6; i < 9; i++) {
-//            ImageView node = new ImageView(new Image(getClass().getResource(images[i]).toString()));
-//            node.setEffect(new Reflection(0, 0.45, 0.3, 0.1));
-//            mouseEv(node);
-//            final String action = images[i].split("-")[0].toLowerCase();
-//            node.setOnMouseClicked(new EventHandler<MouseEvent>() {
-//                @Override
-//                public void handle(MouseEvent t) {
-//                    mouseClicked(action);
-//                }
-//            });
-//            node.setTranslateX(110 * (i - 5) - 80);
-//            node.setTranslateY(215);
-//            anchorPane.getChildren().add(node);
-//        }
-//        ImageView node = new ImageView(new Image(getClass().getResource(images[9]).toString()));
-//        node.setEffect(new Reflection(0, 0.45, 0.3, 0.1));
-//        mouseEv(node);
-//        final String action = images[9].split("-")[0].toLowerCase();
-//        node.setOnMouseClicked(new EventHandler<MouseEvent>() {
-//            @Override
-//            public void handle(MouseEvent t) {
-//                mouseClicked(action);
-//            }
-//        });
-//        node.setTranslateX(250);
-//        node.setTranslateY(305);
-//        anchorPane.getChildren().add(node);
-
 
     }
 
     @FXML
     private void handleMenuItemNew() {
-
-
 
         list.setEditable(true);
         Callback<TableColumn, TableCell> cellFactory =
@@ -210,10 +178,10 @@ public class MainController implements Initializable {
         columnСoncentration.setMinWidth(105);
         columnСoncentration.setSortable(false);
 
-        columnСoncentration.setCellFactory(cellFactory);
         columnPressure.setCellFactory(cellFactory);
+        columnСoncentration.setCellFactory(cellFactory);
 
-        columnPressure.setOnEditCommit(
+        columnСoncentration.setOnEditCommit(
                 new EventHandler<TableColumn.CellEditEvent<XYChart.Data, Number>>() {
                     @Override
                     public void handle(TableColumn.CellEditEvent<XYChart.Data, Number> t) {
@@ -221,7 +189,7 @@ public class MainController implements Initializable {
                                 t.getTablePosition().getRow())).setYValue(t.getNewValue());
                     }
                 });
-        columnСoncentration.setOnEditCommit(
+        columnPressure.setOnEditCommit(
                 new EventHandler<TableColumn.CellEditEvent<XYChart.Data, Number>>() {
                     @Override
                     public void handle(TableColumn.CellEditEvent<XYChart.Data, Number> d) {
@@ -231,7 +199,7 @@ public class MainController implements Initializable {
                 });
 
         dataList = FXCollections.observableArrayList(
-               new XYChart.Data(0.269, 3.347900E-05),
+                new XYChart.Data(0.269, 3.347900E-05),
                 new XYChart.Data(6.520, 9.695830E-05),
                 new XYChart.Data(12.379, 7.174140E-04),
                 new XYChart.Data(20.176, 9.000000E-04),
@@ -257,16 +225,8 @@ public class MainController implements Initializable {
                 new XYChart.Data(559.875, 1.106),
                 new XYChart.Data(586.125, 0.863));
 
-        xAxis.setLabel("Concentration");
-        yAxis.setLabel("Pressure");
-
-        lineChart.setTitle("Monitoring of technological process");
-        XYChart.Series series = new XYChart.Series(dataList);
-        series.setName("Schedule");
-        lineChart.getData().add(series);
-
         list.setItems(dataList);
-        list.getColumns().addAll(columnPressure, columnСoncentration);
+        list.getColumns().setAll(columnPressure, columnСoncentration);
 
         setCurrentPane(anchorDataPane);
         handleMenuItemDock(dockPane);
@@ -318,12 +278,32 @@ public class MainController implements Initializable {
             @Override
             public void handle(MouseEvent t) {
                 imageView.setEffect(new Glow(0.7));
+                imageView.setScaleX(1.1);
+                imageView.setScaleY(1.1);
             }
         });
         imageView.setOnMouseExited(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent t) {
                 imageView.setEffect(null);
+                imageView.setScaleX(1.0);
+                imageView.setScaleY(1.0);
+            }
+        });
+        imageView.setOnMousePressed(new EventHandler<MouseEvent>() {
+
+            @Override
+            public void handle(MouseEvent t) {
+                imageView.setScaleX(1.0);
+                imageView.setScaleY(1.0);
+            }
+        });
+        imageView.setOnMouseReleased(new EventHandler<MouseEvent>() {
+
+            @Override
+            public void handle(MouseEvent t) {
+                imageView.setScaleX(1.1);
+                imageView.setScaleY(1.1);
             }
         });
     }
@@ -342,6 +322,10 @@ public class MainController implements Initializable {
                     Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 break;
+            case "icon3.png": {
+                handleBuild();
+            }
+            break;
             case "icon5.png":
                 handleMenuItemTutorial();
                 break;
