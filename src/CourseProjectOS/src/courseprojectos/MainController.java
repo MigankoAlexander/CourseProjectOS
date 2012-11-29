@@ -34,7 +34,6 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.effect.Glow;
-import javafx.scene.effect.Reflection;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
@@ -43,6 +42,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.util.Callback;
 import javax.swing.JFileChooser;
+import methodsforschedules.MethodsForSchedules;
 
 public class MainController implements Initializable {
 
@@ -197,7 +197,9 @@ public class MainController implements Initializable {
                                 d.getTablePosition().getRow())).setXValue(d.getNewValue());
                     }
                 });
-
+        
+//        MethodsForSchedules.approximate(null, 0);
+        
         dataList = FXCollections.observableArrayList(
                 new XYChart.Data(0.269, 3.347900E-05),
                 new XYChart.Data(6.520, 9.695830E-05),
