@@ -40,6 +40,8 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
 import javafx.util.Callback;
 import javax.swing.JFileChooser;
 import methodsforschedules.MethodsForSchedules;
@@ -70,6 +72,8 @@ public class MainController implements Initializable {
     private NumberAxis xAxis;
     @FXML
     private NumberAxis yAxis;
+    @FXML
+    private WebView webViewHelp;
     private AnchorPane currentPane;
     private AnchorPane previousPane;
     @FXML
@@ -88,6 +92,9 @@ public class MainController implements Initializable {
     private void handleMenuItemHelp() {
         previousPane = currentPane;
         setCurrentPane(anchorPaneHelp);
+        WebEngine webEngine = webViewHelp.getEngine();
+        URL urlHelp = getClass().getResource("help.html");
+        webEngine.load(urlHelp.toExternalForm());
     }
 
     @FXML
@@ -156,15 +163,14 @@ public class MainController implements Initializable {
 
     @FXML
     private void handleMenuItemNew() {
-
         list.setEditable(true);
         Callback<TableColumn, TableCell> cellFactory =
                 new Callback<TableColumn, TableCell>() {
-                    @Override
-                    public TableCell call(TableColumn p) {
-                        return new EditingCell();
-                    }
-                };
+            @Override
+            public TableCell call(TableColumn p) {
+                return new EditingCell();
+            }
+        };
 
         TableColumn columnPressure = new TableColumn("Pressure");
         columnPressure.setCellValueFactory(
@@ -183,23 +189,23 @@ public class MainController implements Initializable {
 
         columnСoncentration.setOnEditCommit(
                 new EventHandler<TableColumn.CellEditEvent<XYChart.Data, Number>>() {
-                    @Override
-                    public void handle(TableColumn.CellEditEvent<XYChart.Data, Number> t) {
-                        ((XYChart.Data) t.getTableView().getItems().get(
-                                t.getTablePosition().getRow())).setYValue(t.getNewValue());
-                    }
-                });
+            @Override
+            public void handle(TableColumn.CellEditEvent<XYChart.Data, Number> t) {
+                ((XYChart.Data) t.getTableView().getItems().get(
+                        t.getTablePosition().getRow())).setYValue(t.getNewValue());
+            }
+        });
         columnPressure.setOnEditCommit(
                 new EventHandler<TableColumn.CellEditEvent<XYChart.Data, Number>>() {
-                    @Override
-                    public void handle(TableColumn.CellEditEvent<XYChart.Data, Number> d) {
-                        ((XYChart.Data) d.getTableView().getItems().get(
-                                d.getTablePosition().getRow())).setXValue(d.getNewValue());
-                    }
-                });
-        
+            @Override
+            public void handle(TableColumn.CellEditEvent<XYChart.Data, Number> d) {
+                ((XYChart.Data) d.getTableView().getItems().get(
+                        d.getTablePosition().getRow())).setXValue(d.getNewValue());
+            }
+        });
+
 //        MethodsForSchedules.approximate(null, 0);
-        
+
         dataList = FXCollections.observableArrayList(
                 new XYChart.Data(0.269, 3.347900E-05),
                 new XYChart.Data(6.520, 9.695830E-05),
@@ -243,16 +249,16 @@ public class MainController implements Initializable {
 
         paneChartContainer.viewportBoundsProperty().addListener(
                 new ChangeListener<Bounds>() {
-                    @Override
-                    public void changed(ObservableValue<? extends Bounds> observableValue, Bounds oldBounds, Bounds newBounds) {
-                        lineChart.setMinSize(
-                                Math.max(lineChart.getPrefWidth(), newBounds.getWidth()),
-                                Math.max(lineChart.getPrefHeight(), newBounds.getHeight()));
-                        paneChartContainer.setPannable(
-                                (lineChart.getPrefWidth() > newBounds.getWidth())
-                                || (lineChart.getPrefHeight() > newBounds.getHeight()));
-                    }
-                });
+            @Override
+            public void changed(ObservableValue<? extends Bounds> observableValue, Bounds oldBounds, Bounds newBounds) {
+                lineChart.setMinSize(
+                        Math.max(lineChart.getPrefWidth(), newBounds.getWidth()),
+                        Math.max(lineChart.getPrefHeight(), newBounds.getHeight()));
+                paneChartContainer.setPannable(
+                        (lineChart.getPrefWidth() > newBounds.getWidth())
+                        || (lineChart.getPrefHeight() > newBounds.getHeight()));
+            }
+        });
 
         setAllInvisible();
         setCurrentPane(anchorPaneChart);
@@ -293,7 +299,6 @@ public class MainController implements Initializable {
             }
         });
         imageView.setOnMousePressed(new EventHandler<MouseEvent>() {
-
             @Override
             public void handle(MouseEvent t) {
                 imageView.setScaleX(1.0);
@@ -301,7 +306,6 @@ public class MainController implements Initializable {
             }
         });
         imageView.setOnMouseReleased(new EventHandler<MouseEvent>() {
-
             @Override
             public void handle(MouseEvent t) {
                 imageView.setScaleX(1.1);
