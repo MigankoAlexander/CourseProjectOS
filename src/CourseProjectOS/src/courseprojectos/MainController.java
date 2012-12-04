@@ -4,11 +4,19 @@
  */
 package courseprojectos;
 
+import com.sun.javafx.collections.ObservableListWrapper;
+import java.awt.geom.Point2D;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
+import java.util.AbstractList;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
@@ -80,7 +88,9 @@ public class MainController implements Initializable {
     private TableView<XYChart.Data> list;
     private File file;
     Map<String, AnchorPane> panes = new HashMap<>();
-    private ObservableList<XYChart.Data> dataList = null;
+    ObservableList<XYChart.Data> obsDataList = null;
+    ObservableList<XYChart.Data> obsReadyList;
+    List<Point2D.Double> dataList = new ArrayList<>();
 
     @FXML
     private void handleMenuItemTutorial() {
@@ -103,7 +113,7 @@ public class MainController implements Initializable {
         yAxis.setLabel("Pressure");
 
         lineChart.setTitle("Monitoring of technological process");
-        XYChart.Series series = new XYChart.Series(dataList);
+        XYChart.Series series = new XYChart.Series(obsReadyList);
         series.setName("Schedule");
         lineChart.getData().setAll(series);
     }
@@ -166,11 +176,11 @@ public class MainController implements Initializable {
         list.setEditable(true);
         Callback<TableColumn, TableCell> cellFactory =
                 new Callback<TableColumn, TableCell>() {
-            @Override
-            public TableCell call(TableColumn p) {
-                return new EditingCell();
-            }
-        };
+                    @Override
+                    public TableCell call(TableColumn p) {
+                        return new EditingCell();
+                    }
+                };
 
         TableColumn columnPressure = new TableColumn("Pressure");
         columnPressure.setCellValueFactory(
@@ -189,24 +199,47 @@ public class MainController implements Initializable {
 
         columnСoncentration.setOnEditCommit(
                 new EventHandler<TableColumn.CellEditEvent<XYChart.Data, Number>>() {
-            @Override
-            public void handle(TableColumn.CellEditEvent<XYChart.Data, Number> t) {
-                ((XYChart.Data) t.getTableView().getItems().get(
-                        t.getTablePosition().getRow())).setYValue(t.getNewValue());
-            }
-        });
+                    @Override
+                    public void handle(TableColumn.CellEditEvent<XYChart.Data, Number> t) {
+                        ((XYChart.Data) t.getTableView().getItems().get(
+                                t.getTablePosition().getRow())).setYValue(t.getNewValue());
+                    }
+                });
         columnPressure.setOnEditCommit(
                 new EventHandler<TableColumn.CellEditEvent<XYChart.Data, Number>>() {
-            @Override
-            public void handle(TableColumn.CellEditEvent<XYChart.Data, Number> d) {
-                ((XYChart.Data) d.getTableView().getItems().get(
-                        d.getTablePosition().getRow())).setXValue(d.getNewValue());
-            }
-        });
-
-//        MethodsForSchedules.approximate(null, 0);
-
-        dataList = FXCollections.observableArrayList(
+                    @Override
+                    public void handle(TableColumn.CellEditEvent<XYChart.Data, Number> d) {
+                        ((XYChart.Data) d.getTableView().getItems().get(
+                                d.getTablePosition().getRow())).setXValue(d.getNewValue());
+                    }
+                });
+//        obsDataList = FXCollections.observableArrayList(
+//                new Point2D.Double(0.269, 3.347900E-05),
+//                new Point2D.Double(6.520, 9.695830E-05),
+//                new Point2D.Double(12.379, 7.174140E-04),
+//                new Point2D.Double(20.176, 9.000000E-04),
+//                new Point2D.Double(30.427, 8.525310E-04),
+//                new Point2D.Double(41.669, 8.258400E-04),
+//                new Point2D.Double(56.125, 8.756500E-04),
+//                new Point2D.Double(72.375, 0.009),
+//                new Point2D.Double(90.629, 0.035),
+//                new Point2D.Double(109.879, 0.073),
+//                new Point2D.Double(132.234, 0.138),
+//                new Point2D.Double(153.388, 0.236),
+//                new Point2D.Double(175.629, 0.361),
+//                new Point2D.Double(201.329, 0.530),
+//                new Point2D.Double(220.127, 0.853),
+//                new Point2D.Double(253.177, 1.269),
+//                new Point2D.Double(280.125, 1.447),
+//                new Point2D.Double(319.246, 1.565),
+//                new Point2D.Double(349.029, 1.579),
+//                new Point2D.Double(389.149, 1.559),
+//                new Point2D.Double(426.621, 1.535),
+//                new Point2D.Double(477.666, 1.399),
+//                new Point2D.Double(526.269, 1.287),
+//                new Point2D.Double(559.875, 1.106),
+//                new Point2D.Double(586.125, 0.863));
+        obsDataList = FXCollections.observableArrayList(
                 new XYChart.Data(0.269, 3.347900E-05),
                 new XYChart.Data(6.520, 9.695830E-05),
                 new XYChart.Data(12.379, 7.174140E-04),
@@ -233,7 +266,26 @@ public class MainController implements Initializable {
                 new XYChart.Data(559.875, 1.106),
                 new XYChart.Data(586.125, 0.863));
 
-        list.setItems(dataList);
+        for (int index = 0; index < obsDataList.size(); index++) {
+            Double x = Double.parseDouble(obsDataList.get(index).getXValue().toString());
+            Double y = Double.parseDouble(obsDataList.get(index).getYValue().toString());
+            Point2D.Double xy = new Point2D.Double(x, y);
+            dataList.add(xy);
+        }
+
+        List<Point2D.Double> readyList = MethodsForSchedules.interpolate(dataList, 100);
+        for (int index = 0; index < readyList.size(); index++) {
+            System.out.println(readyList.size());
+            //System.out.println(readyList.get(index).x +"  "+readyList.get(index).y);
+        }
+
+        for (int index = 0; index < readyList.size(); index++) {
+            obsDataList.set(index, new XYChart.Data(readyList.get(index).x, readyList.get(index).x));
+
+        }
+
+
+        list.setItems(obsDataList);
         list.getColumns().setAll(columnPressure, columnСoncentration);
 
         setCurrentPane(anchorDataPane);
@@ -249,16 +301,16 @@ public class MainController implements Initializable {
 
         paneChartContainer.viewportBoundsProperty().addListener(
                 new ChangeListener<Bounds>() {
-            @Override
-            public void changed(ObservableValue<? extends Bounds> observableValue, Bounds oldBounds, Bounds newBounds) {
-                lineChart.setMinSize(
-                        Math.max(lineChart.getPrefWidth(), newBounds.getWidth()),
-                        Math.max(lineChart.getPrefHeight(), newBounds.getHeight()));
-                paneChartContainer.setPannable(
-                        (lineChart.getPrefWidth() > newBounds.getWidth())
-                        || (lineChart.getPrefHeight() > newBounds.getHeight()));
-            }
-        });
+                    @Override
+                    public void changed(ObservableValue<? extends Bounds> observableValue, Bounds oldBounds, Bounds newBounds) {
+                        lineChart.setMinSize(
+                                Math.max(lineChart.getPrefWidth(), newBounds.getWidth()),
+                                Math.max(lineChart.getPrefHeight(), newBounds.getHeight()));
+                        paneChartContainer.setPannable(
+                                (lineChart.getPrefWidth() > newBounds.getWidth())
+                                || (lineChart.getPrefHeight() > newBounds.getHeight()));
+                    }
+                });
 
         setAllInvisible();
         setCurrentPane(anchorPaneChart);
