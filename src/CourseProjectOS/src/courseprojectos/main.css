@@ -54,3 +54,9 @@
         rgba(255,255,255,0));
 }
 
+.chart {
+    -fx-font-family: "Arial";
+    -fx-font-size: 14;
+    -fx-text-fill: white;
+    -fx-text-fill: rgb(255, 255, 255, 0.4);
+}

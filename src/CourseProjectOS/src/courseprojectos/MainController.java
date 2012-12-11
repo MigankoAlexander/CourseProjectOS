@@ -30,6 +30,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Bounds;
+import javafx.scene.Cursor;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
@@ -41,12 +42,16 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.effect.BlendMode;
 import javafx.scene.effect.Glow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.DragEvent;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseDragEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.ZoomEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
@@ -88,9 +93,10 @@ public class MainController implements Initializable {
     private TableView<XYChart.Data> list;
     private File file;
     Map<String, AnchorPane> panes = new HashMap<>();
-    ObservableList<XYChart.Data> obsDataList = null;
-    ObservableList<XYChart.Data> obsReadyList;
+    ObservableList<XYChart.Data> obsDataList = FXCollections.observableArrayList();
+    ObservableList<XYChart.Data> listForBuilding = FXCollections.observableArrayList();
     List<Point2D.Double> dataList = new ArrayList<>();
+    boolean tableInit = false;
 
     @FXML
     private void handleMenuItemTutorial() {
@@ -109,13 +115,26 @@ public class MainController implements Initializable {
 
     @FXML
     private void handleBuild() {
-        xAxis.setLabel("Concentration");
-        yAxis.setLabel("Pressure");
+        if (listForBuilding.size() != 0) {
+            if (lineChart.getData().isEmpty()) {
+                lineChart.setLegendVisible(false);
+                lineChart.setCreateSymbols(false);
+                xAxis.setLabel("Concentration");
+                yAxis.setLabel("Pressure");
+                lineChart.setTitle("Monitoring of technological process");
+                XYChart.Series series = new XYChart.Series(listForBuilding);
+                series.setName("Schedule");
+                lineChart.getData().setAll(series);
+            } else {
+                lineChart.getData().clear();
+                XYChart.Series series = new XYChart.Series(listForBuilding);
+                lineChart.getData().setAll(series);
+            }
+        } else {
 
-        lineChart.setTitle("Monitoring of technological process");
-        XYChart.Series series = new XYChart.Series(obsReadyList);
-        series.setName("Schedule");
-        lineChart.getData().setAll(series);
+            System.out.println("Wow");
+
+        }
     }
 
     @FXML
@@ -133,8 +152,33 @@ public class MainController implements Initializable {
         JFileChooser fc = new JFileChooser();
         if (fc.showOpenDialog(fc) == JFileChooser.APPROVE_OPTION) {
             file = fc.getSelectedFile();
-            //to be continued...
+
+            obsDataList = FXCollections.observableArrayList();
+            listForBuilding = FXCollections.observableArrayList();
+
+            obsDataList = FileReader.readFile(file);
+
+            for (int index = 0; index < obsDataList.size(); index++) {
+                Double x = (Double) obsDataList.get(index).getXValue();
+                Double y = (Double) obsDataList.get(index).getYValue();
+                Point2D.Double xy = new Point2D.Double(x, y);
+                dataList.add(xy);
+            }
+
+            List<Point2D.Double> interpList = MethodsForSchedules.interpolate(dataList, 100);
+            for (int i = 0; i < interpList.size(); i++) {
+                listForBuilding.add(new XYChart.Data(interpList.get(i).getX(), interpList.get(i).getY()));
+            }
+
+
         }
+        if (tableInit == false) {
+            initTable();
+            setCurrentPane(anchorDataPane);
+        }
+
+        list.setItems(obsDataList);
+        handleMenuItemDock(dockPane);
     }
 
     @FXML
@@ -155,7 +199,6 @@ public class MainController implements Initializable {
 
         for (int i = 0; i < 10; i++) {
             final ImageView node = new ImageView(new Image(getClass().getResource(images[i]).toString()));
-            //node.setEffect(new Reflection(0, 0.5, 0.3, 0.1));
             mouseEv(node);
             final String action = images[i].split("-")[0].toLowerCase();
             node.setOnMouseClicked(new EventHandler<MouseEvent>() {
@@ -174,71 +217,6 @@ public class MainController implements Initializable {
     @FXML
     private void handleMenuItemNew() {
         list.setEditable(true);
-        Callback<TableColumn, TableCell> cellFactory =
-                new Callback<TableColumn, TableCell>() {
-                    @Override
-                    public TableCell call(TableColumn p) {
-                        return new EditingCell();
-                    }
-                };
-
-        TableColumn columnPressure = new TableColumn("Pressure");
-        columnPressure.setCellValueFactory(
-                new PropertyValueFactory<XYChart.Data, Number>("XValue"));
-        columnPressure.setMinWidth(70);
-        columnPressure.setSortable(false);
-
-        TableColumn columnСoncentration = new TableColumn("Сoncentration");
-        columnСoncentration.setCellValueFactory(
-                new PropertyValueFactory<XYChart.Data, Number>("YValue"));
-        columnСoncentration.setMinWidth(105);
-        columnСoncentration.setSortable(false);
-
-        columnPressure.setCellFactory(cellFactory);
-        columnСoncentration.setCellFactory(cellFactory);
-
-        columnСoncentration.setOnEditCommit(
-                new EventHandler<TableColumn.CellEditEvent<XYChart.Data, Number>>() {
-                    @Override
-                    public void handle(TableColumn.CellEditEvent<XYChart.Data, Number> t) {
-                        ((XYChart.Data) t.getTableView().getItems().get(
-                                t.getTablePosition().getRow())).setYValue(t.getNewValue());
-                    }
-                });
-        columnPressure.setOnEditCommit(
-                new EventHandler<TableColumn.CellEditEvent<XYChart.Data, Number>>() {
-                    @Override
-                    public void handle(TableColumn.CellEditEvent<XYChart.Data, Number> d) {
-                        ((XYChart.Data) d.getTableView().getItems().get(
-                                d.getTablePosition().getRow())).setXValue(d.getNewValue());
-                    }
-                });
-//        obsDataList = FXCollections.observableArrayList(
-//                new Point2D.Double(0.269, 3.347900E-05),
-//                new Point2D.Double(6.520, 9.695830E-05),
-//                new Point2D.Double(12.379, 7.174140E-04),
-//                new Point2D.Double(20.176, 9.000000E-04),
-//                new Point2D.Double(30.427, 8.525310E-04),
-//                new Point2D.Double(41.669, 8.258400E-04),
-//                new Point2D.Double(56.125, 8.756500E-04),
-//                new Point2D.Double(72.375, 0.009),
-//                new Point2D.Double(90.629, 0.035),
-//                new Point2D.Double(109.879, 0.073),
-//                new Point2D.Double(132.234, 0.138),
-//                new Point2D.Double(153.388, 0.236),
-//                new Point2D.Double(175.629, 0.361),
-//                new Point2D.Double(201.329, 0.530),
-//                new Point2D.Double(220.127, 0.853),
-//                new Point2D.Double(253.177, 1.269),
-//                new Point2D.Double(280.125, 1.447),
-//                new Point2D.Double(319.246, 1.565),
-//                new Point2D.Double(349.029, 1.579),
-//                new Point2D.Double(389.149, 1.559),
-//                new Point2D.Double(426.621, 1.535),
-//                new Point2D.Double(477.666, 1.399),
-//                new Point2D.Double(526.269, 1.287),
-//                new Point2D.Double(559.875, 1.106),
-//                new Point2D.Double(586.125, 0.863));
         obsDataList = FXCollections.observableArrayList(
                 new XYChart.Data(0.269, 3.347900E-05),
                 new XYChart.Data(6.520, 9.695830E-05),
@@ -264,32 +242,30 @@ public class MainController implements Initializable {
                 new XYChart.Data(477.666, 1.399),
                 new XYChart.Data(526.269, 1.287),
                 new XYChart.Data(559.875, 1.106),
-                new XYChart.Data(586.125, 0.863));
+                new XYChart.Data(586.125, 0.86)
+                );
 
         for (int index = 0; index < obsDataList.size(); index++) {
-            Double x = Double.parseDouble(obsDataList.get(index).getXValue().toString());
-            Double y = Double.parseDouble(obsDataList.get(index).getYValue().toString());
+            Double x = (Double) obsDataList.get(index).getXValue();
+            Double y = (Double) obsDataList.get(index).getYValue();
             Point2D.Double xy = new Point2D.Double(x, y);
             dataList.add(xy);
         }
-
-        List<Point2D.Double> readyList = MethodsForSchedules.interpolate(dataList, 100);
-        for (int index = 0; index < readyList.size(); index++) {
-            System.out.println(readyList.size());
-            //System.out.println(readyList.get(index).x +"  "+readyList.get(index).y);
+        listForBuilding = FXCollections.observableArrayList();
+        List<Point2D.Double> interpList = MethodsForSchedules.interpolate(dataList, 10*obsDataList.size());
+        for (int i = 0; i < interpList.size(); i++) {
+            listForBuilding.add(new XYChart.Data(interpList.get(i).getX(), interpList.get(i).getY()));
         }
 
-        for (int index = 0; index < readyList.size(); index++) {
-            obsDataList.set(index, new XYChart.Data(readyList.get(index).x, readyList.get(index).x));
-
+        if (tableInit == false) {
+            initTable();
+            setCurrentPane(anchorDataPane);
         }
-
-
         list.setItems(obsDataList);
-        list.getColumns().setAll(columnPressure, columnСoncentration);
 
-        setCurrentPane(anchorDataPane);
+
         handleMenuItemDock(dockPane);
+
     }
 
     @Override
@@ -337,6 +313,7 @@ public class MainController implements Initializable {
         imageView.setOnMouseEntered(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent t) {
+                imageView.setCursor(Cursor.HAND);
                 imageView.setEffect(new Glow(0.7));
                 imageView.setScaleX(1.1);
                 imageView.setScaleY(1.1);
@@ -345,6 +322,7 @@ public class MainController implements Initializable {
         imageView.setOnMouseExited(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent t) {
+                imageView.setCursor(Cursor.DEFAULT);
                 imageView.setEffect(null);
                 imageView.setScaleX(1.0);
                 imageView.setScaleY(1.0);
@@ -394,6 +372,55 @@ public class MainController implements Initializable {
                 handleMenuItemExit();
 //                break;
         }
+    }
+
+    private void initTable() {
+
+
+
+        Callback<TableColumn, TableCell> cellFactory =
+                new Callback<TableColumn, TableCell>() {
+                    @Override
+                    public TableCell call(TableColumn p) {
+                        return new EditingCell();
+                    }
+                };
+
+        TableColumn columnPressure = new TableColumn("Pressure");
+        columnPressure.setCellValueFactory(
+                new PropertyValueFactory<XYChart.Data, Number>("XValue"));
+        columnPressure.setMinWidth(70);
+        columnPressure.setSortable(false);
+
+        TableColumn columnСoncentration = new TableColumn("Сoncentration");
+        columnСoncentration.setCellValueFactory(
+                new PropertyValueFactory<XYChart.Data, Number>("YValue"));
+        columnСoncentration.setMinWidth(105);
+        columnСoncentration.setSortable(false);
+
+        columnPressure.setCellFactory(cellFactory);
+        columnСoncentration.setCellFactory(cellFactory);
+
+        columnСoncentration.setOnEditCommit(
+                new EventHandler<TableColumn.CellEditEvent<XYChart.Data, Number>>() {
+                    @Override
+                    public void handle(TableColumn.CellEditEvent<XYChart.Data, Number> t) {
+                        ((XYChart.Data) t.getTableView().getItems().get(
+                                t.getTablePosition().getRow())).setYValue(t.getNewValue());
+                    }
+                });
+        columnPressure.setOnEditCommit(
+                new EventHandler<TableColumn.CellEditEvent<XYChart.Data, Number>>() {
+                    @Override
+                    public void handle(TableColumn.CellEditEvent<XYChart.Data, Number> d) {
+                        ((XYChart.Data) d.getTableView().getItems().get(
+                                d.getTablePosition().getRow())).setXValue(d.getNewValue());
+                    }
+                });
+
+
+        list.getColumns().setAll(columnPressure, columnСoncentration);
+        tableInit = true;
     }
 }
 
