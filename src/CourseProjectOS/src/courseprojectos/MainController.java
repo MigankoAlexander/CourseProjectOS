@@ -4,7 +4,6 @@
  */
 package courseprojectos;
 
-import com.sun.javafx.collections.ObservableListWrapper;
 import java.awt.geom.Point2D;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -28,12 +27,20 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Bounds;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Cursor;
+import javafx.scene.Group;
+import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
+import javafx.scene.chart.LineChartBuilder;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
@@ -53,14 +60,32 @@ import javafx.scene.input.MouseDragEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ZoomEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
+import javafx.scene.layout.VBoxBuilder;
+import javafx.scene.shape.StrokeLineCap;
+import javafx.scene.text.Text;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.util.Callback;
 import javax.swing.JFileChooser;
 import methodsforschedules.MethodsForSchedules;
 
 public class MainController implements Initializable {
 
+    @FXML
+    private AnchorPane MessagePane;
+    @FXML
+    private TextField addConcentration;
+    @FXML
+    private TextField addPressure;
+    @FXML
+    private Button addButton;
     @FXML
     private MenuItem menuItemTutorial;
     @FXML
@@ -115,24 +140,49 @@ public class MainController implements Initializable {
 
     @FXML
     private void handleBuild() {
-        if (listForBuilding.size() != 0) {
-            if (lineChart.getData().isEmpty()) {
-                lineChart.setLegendVisible(false);
-                lineChart.setCreateSymbols(false);
-                xAxis.setLabel("Concentration");
-                yAxis.setLabel("Pressure");
-                lineChart.setTitle("Monitoring of technological process");
-                XYChart.Series series = new XYChart.Series(listForBuilding);
-                series.setName("Schedule");
-                lineChart.getData().setAll(series);
-            } else {
-                lineChart.getData().clear();
-                XYChart.Series series = new XYChart.Series(listForBuilding);
-                lineChart.getData().setAll(series);
+        lineChart.getData().clear();
+        listForBuilding = FXCollections.observableArrayList();
+        ObservableList<XYChart.Data> readedList = FXCollections.observableArrayList();
+        if (tableInit) {
+            int cellNumber = 0;
+            while (list.getColumns().get(0).getCellData(cellNumber) != null) {
+                double x = (Double) list.getColumns().get(0).getCellData(cellNumber);
+                double y = (Double) list.getColumns().get(1).getCellData(cellNumber);
+                readedList.add(cellNumber, (new XYChart.Data(x, y)));
+                cellNumber++;
             }
-        } else {
+        }
+        if (readedList.size() != 0) {
+            for (int index = 0; index < readedList.size(); index++) {
+                Double x = (Double) readedList.get(index).getXValue();
+                Double y = (Double) readedList.get(index).getYValue();
+                Point2D.Double xy = new Point2D.Double(x, y);
+                dataList.add(xy);
+            }
 
-            System.out.println("Wow");
+            List<Point2D.Double> interpList = MethodsForSchedules.ordinaryLeastSquares(dataList);
+            for (int i = 0; i < interpList.size(); i++) {
+                listForBuilding.add(new XYChart.Data(interpList.get(i).getX(), interpList.get(i).getY()));
+            }
+
+
+            lineChart.setAnimated(false);
+
+            lineChart.setLegendVisible(false);
+            lineChart.setCreateSymbols(false);
+            xAxis.setLabel("Pressure");
+            yAxis.setLabel("Concentration");
+            lineChart.setTitle("Monitoring of technological process");
+            XYChart.Series series = new XYChart.Series(listForBuilding);
+            series.setName("Schedule");
+            lineChart.getData().setAll(series);
+
+        } else {
+            try {
+                showErrorDialog("Ошибка", "Набор не задан");
+            } catch (IOException ex) {
+                Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
+            }
 
         }
     }
@@ -149,36 +199,23 @@ public class MainController implements Initializable {
 
     @FXML
     private void handleMenuItemOpen() throws FileNotFoundException, IOException {
+        list.setEditable(true);
+
         JFileChooser fc = new JFileChooser();
         if (fc.showOpenDialog(fc) == JFileChooser.APPROVE_OPTION) {
             file = fc.getSelectedFile();
-
+        }
+        if (file != null) {
             obsDataList = FXCollections.observableArrayList();
-            listForBuilding = FXCollections.observableArrayList();
-
             obsDataList = FileReader.readFile(file);
-
-            for (int index = 0; index < obsDataList.size(); index++) {
-                Double x = (Double) obsDataList.get(index).getXValue();
-                Double y = (Double) obsDataList.get(index).getYValue();
-                Point2D.Double xy = new Point2D.Double(x, y);
-                dataList.add(xy);
+            if (tableInit == false) {
+                initTable();
+                setCurrentPane(anchorDataPane);
             }
 
-            List<Point2D.Double> interpList = MethodsForSchedules.interpolate(dataList, 100);
-            for (int i = 0; i < interpList.size(); i++) {
-                listForBuilding.add(new XYChart.Data(interpList.get(i).getX(), interpList.get(i).getY()));
-            }
-
-
+            list.setItems(obsDataList);
+            handleMenuItemDock(dockPane);
         }
-        if (tableInit == false) {
-            initTable();
-            setCurrentPane(anchorDataPane);
-        }
-
-        list.setItems(obsDataList);
-        handleMenuItemDock(dockPane);
     }
 
     @FXML
@@ -215,47 +252,22 @@ public class MainController implements Initializable {
     }
 
     @FXML
+    private void handleAdd() {
+        addButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent e) {
+                obsDataList.add(new XYChart.Data(Double.parseDouble(addPressure.getText()),
+                        Double.parseDouble(addConcentration.getText())));
+                addConcentration.clear();
+                addPressure.clear();
+            }
+        });
+    }
+
+    @FXML
     private void handleMenuItemNew() {
         list.setEditable(true);
-        obsDataList = FXCollections.observableArrayList(
-                new XYChart.Data(0.269, 3.347900E-05),
-                new XYChart.Data(6.520, 9.695830E-05),
-                new XYChart.Data(12.379, 7.174140E-04),
-                new XYChart.Data(20.176, 9.000000E-04),
-                new XYChart.Data(30.427, 8.525310E-04),
-                new XYChart.Data(41.669, 8.258400E-04),
-                new XYChart.Data(56.125, 8.756500E-04),
-                new XYChart.Data(72.375, 0.009),
-                new XYChart.Data(90.629, 0.035),
-                new XYChart.Data(109.879, 0.073),
-                new XYChart.Data(132.234, 0.138),
-                new XYChart.Data(153.388, 0.236),
-                new XYChart.Data(175.629, 0.361),
-                new XYChart.Data(201.329, 0.530),
-                new XYChart.Data(220.127, 0.853),
-                new XYChart.Data(253.177, 1.269),
-                new XYChart.Data(280.125, 1.447),
-                new XYChart.Data(319.246, 1.565),
-                new XYChart.Data(349.029, 1.579),
-                new XYChart.Data(389.149, 1.559),
-                new XYChart.Data(426.621, 1.535),
-                new XYChart.Data(477.666, 1.399),
-                new XYChart.Data(526.269, 1.287),
-                new XYChart.Data(559.875, 1.106),
-                new XYChart.Data(586.125, 0.86)
-                );
-
-        for (int index = 0; index < obsDataList.size(); index++) {
-            Double x = (Double) obsDataList.get(index).getXValue();
-            Double y = (Double) obsDataList.get(index).getYValue();
-            Point2D.Double xy = new Point2D.Double(x, y);
-            dataList.add(xy);
-        }
-        listForBuilding = FXCollections.observableArrayList();
-        List<Point2D.Double> interpList = MethodsForSchedules.interpolate(dataList, 10*obsDataList.size());
-        for (int i = 0; i < interpList.size(); i++) {
-            listForBuilding.add(new XYChart.Data(interpList.get(i).getX(), interpList.get(i).getY()));
-        }
+        obsDataList = FXCollections.observableArrayList();
 
         if (tableInit == false) {
             initTable();
@@ -352,10 +364,13 @@ public class MainController implements Initializable {
             case "icon2.png":
                 try {
                     handleMenuItemOpen();
+
                 } catch (FileNotFoundException ex) {
-                    Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(MainController.class
+                            .getName()).log(Level.SEVERE, null, ex);
                 } catch (IOException ex) {
-                    Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(MainController.class
+                            .getName()).log(Level.SEVERE, null, ex);
                 }
                 break;
             case "icon3.png": {
@@ -368,16 +383,43 @@ public class MainController implements Initializable {
             case "icon8.png":
                 handleMenuItemHelp();
                 break;
+            case "icon9.png":
+                try {
+                    showErrorDialog("Ремонт", "YOU SHALL NOT PASS!!");
+                } catch (IOException ex) {
+                    Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                break;
             case "icon10.png":
                 handleMenuItemExit();
-//                break;
+                break;
         }
     }
 
+    private void showErrorDialog(String title, String message) throws IOException {
+
+        final Stage dialogStage = new Stage();
+        dialogStage.initModality(Modality.WINDOW_MODAL);
+        Button ok = new Button("Ok");
+        ok.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent t) {
+                dialogStage.close();
+            }
+        });
+        dialogStage.setTitle(title);
+        Text text = new Text(message);
+        text.setScaleX(1.2);
+        text.setScaleY(1.2);
+        ok.setTranslateY(20);
+        dialogStage.setScene(new Scene(VBoxBuilder.create().
+                prefHeight(100).prefWidth(200).
+                children(text, ok).
+                alignment(Pos.CENTER).padding(new Insets(5)).build()));
+        dialogStage.show();
+    }
+
     private void initTable() {
-
-
-
         Callback<TableColumn, TableCell> cellFactory =
                 new Callback<TableColumn, TableCell>() {
                     @Override
@@ -418,8 +460,12 @@ public class MainController implements Initializable {
                     }
                 });
 
-
+        addConcentration.setPromptText("Сoncentration");
+        addConcentration.setMaxWidth(columnСoncentration.getPrefWidth());
+        addPressure.setMaxWidth(columnPressure.getPrefWidth());
+        addPressure.setPromptText("Pressure");
         list.getColumns().setAll(columnPressure, columnСoncentration);
+        
         tableInit = true;
     }
 }
