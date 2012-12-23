@@ -5,21 +5,31 @@
 package courseprojectos;
 
 import javafx.application.Application;
+import javafx.application.Preloader;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 public class CourseProjectOS extends Application {
-
     @Override
-    public void start(Stage stage) throws Exception {
+    public void init() throws Exception{
+       this.notifyPreloader(new Preloader.ProgressNotification(0.0));  
+        Thread.sleep(4000);
+       this.notifyPreloader(new Preloader.ProgressNotification(1.0));
+       
+    }
+    @Override
+    public void start(Stage st) throws Exception {
+        Stage stage = new Stage(StageStyle.UTILITY);
         AnchorPane mainView = FXMLLoader.load(getClass().getResource("Main.fxml"));
-
+        stage.setResizable(false);
+        
         Scene scene = new Scene(mainView);
 
 
-        stage.setTitle("Курсовой проект по дисциплине \"Операционные системы\"");
+        stage.setTitle("     Курсовой проект по дисциплине \"Операционные системы\"");
         stage.setScene(scene);
         stage.show();
     }
